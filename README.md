@@ -68,3 +68,11 @@ npx playwright show-report
 | Inheritance | All pages extend `BasePage` |
 | Abstraction | `BasePage` has abstract `getPageTitle()` method |
 | Polymorphism | Each page overrides `getPageTitle()` differently |
+
+## E2E test
+
+Full purchase flow (`tests/e2e-checkout-flow.spec.ts`):
+
+```bash
+npx playwright test tests/e2e-checkout-flow.spec.ts --project=chromium --headed
+```

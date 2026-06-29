@@ -35,11 +35,29 @@ export const billingDetails = {
   country: 'India',
 };
 
+/** Checkout form data for E2E purchase flow on qademo.com */
+export const checkoutDetails = {
+  firstName: 'sample text',
+  lastName: 'sample name',
+  address: 'A'.repeat(256),
+  cardNumber: '4242424242424242',
+  expiry: '12/28',
+  cvv: '123',
+  cardholderName: 'test user',
+};
+
+/** Product IDs used in the E2E catalog → cart flow */
+export const e2eProducts = {
+  firstItemId: 4,
+  secondItemId: 5,
+};
+
 export const urls = {
   home: '/',
   login: '/login',
   cart: '/cart',
   checkout: '/checkout',
   catalog: '/catalog',
+  orders: '/orders',
   shop: '/catalog',
 };

@@ -51,9 +51,18 @@ export class ProductPage extends BasePage {
     await this.waitForPageLoad();
   }
 
-  async addProductToCartByName(productName: string): Promise<void> {
-    await this.page.getByRole('button', { name: new RegExp(`add ${productName} to cart`, 'i') }).click();
+  async addProductToCartById(productId: number): Promise<void> {
+    await Promise.all([
+      this.page.waitForResponse(res => res.url().includes('/api/cart') && res.ok()),
+      this.page.getByTestId(`product-add-to-cart-${productId}`).click(),
+    ]);
     await this.waitForPageLoad();
+  }
+
+  async addProductsToCartByIds(productIds: number[]): Promise<void> {
+    for (const productId of productIds) {
+      await this.addProductToCartById(productId);
+    }
   }
 
   async clickProductByName(productName: string): Promise<void> {

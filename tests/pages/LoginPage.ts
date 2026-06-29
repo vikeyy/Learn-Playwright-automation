@@ -10,16 +10,18 @@ export class LoginPage extends BasePage {
   private readonly usernameInput: Locator;
   private readonly passwordInput: Locator;
   private readonly loginButton: Locator;
+  private readonly standardUserCredential: Locator;
   private readonly errorMessage: Locator;
   private readonly backToHomeLink: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.usernameInput   = page.getByLabel('Username');
-    this.passwordInput   = page.getByLabel('Password');
-    this.loginButton     = page.getByTestId('login-submit-button');
-    this.errorMessage    = page.getByText('Invalid username or password');
-    this.backToHomeLink  = page.getByRole('link', { name: /back to home/i });
+    this.usernameInput           = page.getByLabel('Username');
+    this.passwordInput           = page.getByLabel('Password');
+    this.loginButton             = page.getByTestId('login-submit-button');
+    this.standardUserCredential  = page.getByTestId('test-credential-standard_user');
+    this.errorMessage            = page.getByText('Invalid username or password');
+    this.backToHomeLink          = page.getByRole('link', { name: /back to home/i });
   }
 
   async getPageTitle(): Promise<string> {
@@ -36,9 +38,19 @@ export class LoginPage extends BasePage {
     await this.passwordInput.fill(password);
     await this.loginButton.click();
     await Promise.race([
-      this.page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 10000 }),
-      this.errorMessage.waitFor({ state: 'visible', timeout: 10000 }),
-    ]).catch(() => {});
+      this.page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 15000 }),
+      this.errorMessage.waitFor({ state: 'visible', timeout: 15000 }),
+    ]);
+  }
+
+  async clickStandardUserCredential(): Promise<void> {
+    await this.standardUserCredential.click();
+  }
+
+  async loginWithStandardUser(): Promise<void> {
+    await this.clickStandardUserCredential();
+    await this.loginButton.click();
+    await this.page.waitForURL(/\/catalog/, { timeout: 15000 });
   }
 
   async getErrorMessage(): Promise<string> {

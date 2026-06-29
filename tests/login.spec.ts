@@ -20,7 +20,7 @@ test.describe('Login Page', () => {
 
   test('should login successfully with valid credentials', async ({ loginPage, page }) => {
     await loginPage.login(users.validUser.username, users.validUser.password);
-    await expect(page).not.toHaveURL(/login/);
+    await expect(page).toHaveURL(/catalog/);
   });
 
   test('should navigate back to home page', async ({ loginPage, page }) => {

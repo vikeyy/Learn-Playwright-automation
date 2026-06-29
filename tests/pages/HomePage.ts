@@ -8,6 +8,7 @@ import { BasePage } from './BasePage';
 export class HomePage extends BasePage {
 
   private readonly browseProductsLink: Locator;
+  private readonly heroSignInButton: Locator;
   private readonly navLinks: Locator;
   private readonly cartLink: Locator;
   private readonly logo: Locator;
@@ -15,6 +16,7 @@ export class HomePage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.browseProductsLink = page.getByRole('link', { name: 'Browse Products' });
+    this.heroSignInButton   = page.getByTestId('hero-signin-button');
     this.navLinks            = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link');
     this.cartLink            = page.getByTestId('navbar-cart-link');
     this.logo                = page.getByRole('link', { name: 'QA Demo home' });
@@ -31,6 +33,16 @@ export class HomePage extends BasePage {
 
   async browseProducts(): Promise<void> {
     await this.browseProductsLink.click();
+    await this.waitForPageLoad();
+  }
+
+  async clickHeroSignIn(): Promise<void> {
+    await this.heroSignInButton.click();
+    await this.waitForPageLoad();
+  }
+
+  async openCart(): Promise<void> {
+    await this.cartLink.click();
     await this.waitForPageLoad();
   }
 

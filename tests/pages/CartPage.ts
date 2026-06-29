@@ -15,7 +15,7 @@ export class CartPage extends BasePage {
   constructor(page: Page) {
     super(page);
     this.removeButtons     = page.getByRole('button', { name: /remove .+ from cart/i });
-    this.checkoutButton    = page.getByRole('button', { name: /proceed to checkout/i });
+    this.checkoutButton    = page.getByTestId('proceed-to-checkout-button');
     this.emptyCartMessage  = page.getByText('Your cart is empty');
     this.cartHeading       = page.getByRole('heading', { name: 'Shopping Cart' });
   }
@@ -62,7 +62,7 @@ export class CartPage extends BasePage {
 
   async proceedToCheckout(): Promise<void> {
     await this.checkoutButton.click();
-    await this.waitForPageLoad();
+    await this.page.waitForURL(/\/checkout/, { timeout: 15000 });
   }
 
   async isCartEmpty(): Promise<boolean> {
