@@ -7,21 +7,19 @@ import { BasePage } from './BasePage';
  */
 export class LoginPage extends BasePage {
 
-  private readonly emailInput: Locator;
+  private readonly usernameInput: Locator;
   private readonly passwordInput: Locator;
   private readonly loginButton: Locator;
   private readonly errorMessage: Locator;
-  private readonly forgotPasswordLink: Locator;
-  private readonly registerLink: Locator;
+  private readonly backToHomeLink: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.emailInput        = page.getByLabel('Email address').or(page.locator('#email, input[name="email"]'));
-    this.passwordInput     = page.getByLabel('Password').or(page.locator('#password, input[name="password"]'));
-    this.loginButton       = page.getByRole('button', { name: /login|sign in/i });
-    this.errorMessage      = page.locator('.error-message, .alert-danger, .woocommerce-error');
-    this.forgotPasswordLink = page.getByRole('link', { name: /forgot password/i });
-    this.registerLink      = page.getByRole('link', { name: /register|create account/i });
+    this.usernameInput   = page.getByLabel('Username');
+    this.passwordInput   = page.getByLabel('Password');
+    this.loginButton     = page.getByTestId('login-submit-button');
+    this.errorMessage    = page.getByText('Invalid username or password');
+    this.backToHomeLink  = page.getByRole('link', { name: /back to home/i });
   }
 
   async getPageTitle(): Promise<string> {
@@ -29,15 +27,18 @@ export class LoginPage extends BasePage {
   }
 
   async goto(): Promise<void> {
-    await this.page.goto('/my-account');
+    await this.page.goto('/login');
     await this.waitForPageLoad();
   }
 
-  async login(email: string, password: string): Promise<void> {
-    await this.emailInput.fill(email);
+  async login(username: string, password: string): Promise<void> {
+    await this.usernameInput.fill(username);
     await this.passwordInput.fill(password);
     await this.loginButton.click();
-    await this.waitForPageLoad();
+    await Promise.race([
+      this.page.waitForURL(url => !url.pathname.includes('/login'), { timeout: 10000 }),
+      this.errorMessage.waitFor({ state: 'visible', timeout: 10000 }),
+    ]).catch(() => {});
   }
 
   async getErrorMessage(): Promise<string> {
@@ -49,16 +50,13 @@ export class LoginPage extends BasePage {
     return this.errorMessage.isVisible();
   }
 
-  async clickForgotPassword(): Promise<void> {
-    await this.forgotPasswordLink.click();
-  }
-
-  async clickRegister(): Promise<void> {
-    await this.registerLink.click();
+  async clickBackToHome(): Promise<void> {
+    await this.backToHomeLink.click();
+    await this.waitForPageLoad();
   }
 
   async verifyLoginPageLoaded(): Promise<void> {
     await expect(this.loginButton).toBeVisible();
-    await expect(this.emailInput).toBeVisible();
+    await expect(this.usernameInput).toBeVisible();
   }
 }

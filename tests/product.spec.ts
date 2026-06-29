@@ -1,17 +1,17 @@
-import { test, expect } from '../fixtures/fixtures';
-import { products } from '../data/testData';
+import { test, expect } from './fixtures/fixtures';
+import { products } from './data/testData';
 
 /**
- * product.spec.ts — tests for product listing and search results.
+ * product.spec.ts — tests for product listing and catalog.
  */
 
 test.describe('Product Page', () => {
 
-  test.beforeEach(async ({ homePage }) => {
-    await homePage.searchProduct(products.searchTerm);
+  test.beforeEach(async ({ productPage }) => {
+    await productPage.goto();
   });
 
-  test('should display products after search', async ({ productPage }) => {
+  test('should display products on catalog page', async ({ productPage }) => {
     const count = await productPage.getProductCount();
     expect(count).toBeGreaterThan(0);
   });
@@ -24,16 +24,12 @@ test.describe('Product Page', () => {
 
   test('should add first product to cart', async ({ productPage, page }) => {
     await productPage.addFirstProductToCart();
-    // After adding to cart, a success notice or cart count should update
-    await expect(page.locator('.woocommerce-message, .added_to_cart, .cart-count')).toBeVisible();
+    await expect(page.getByRole('button', { name: /remove .+ from cart/i }).first()).toBeVisible();
   });
 
   test('should navigate to product detail on click', async ({ productPage, page }) => {
-    const titles = await productPage.getProductTitles();
-    if (titles.length > 0) {
-      await productPage.clickProductByName(titles[0].trim());
-      await expect(page).toHaveURL(/product|shop/);
-    }
+    await productPage.clickProductByName(products.firstProduct);
+    await expect(page).toHaveURL(/\/products\//);
   });
 
 });

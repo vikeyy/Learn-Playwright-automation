@@ -5,18 +5,22 @@
 
 export const users = {
   validUser: {
-    email: process.env.USER_EMAIL || 'testuser@example.com',
-    password: process.env.USER_PASSWORD || 'Test@1234',
+    username: process.env.USER_USERNAME || 'standard_user',
+    password: process.env.USER_PASSWORD || 'standard123',
   },
   invalidUser: {
-    email: 'invalid@example.com',
+    username: 'invalid_user',
     password: 'wrongpassword',
+  },
+  lockedUser: {
+    username: 'locked_user',
+    password: 'locked123',
   },
 };
 
 export const products = {
-  searchTerm: 'shirt',
-  firstProduct: 'Album',
+  searchTerm: 'Bluetooth',
+  firstProduct: 'Bluetooth Speaker',
   outOfStockProduct: 'Sunglasses',
 };
 
@@ -33,8 +37,9 @@ export const billingDetails = {
 
 export const urls = {
   home: '/',
-  login: '/my-account',
+  login: '/login',
   cart: '/cart',
   checkout: '/checkout',
-  shop: '/shop',
+  catalog: '/catalog',
+  shop: '/catalog',
 };

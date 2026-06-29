@@ -1,4 +1,4 @@
-import { test, expect } from '../fixtures/fixtures';
+import { test, expect } from './fixtures/fixtures';
 
 /**
  * home.spec.ts — tests for the qademo.com homepage.
@@ -6,11 +6,6 @@ import { test, expect } from '../fixtures/fixtures';
  */
 
 test.describe('Home Page', () => {
-
-  test.beforeEach(async ({ homePage }) => {
-    // homePage.goto() is already called in the fixture
-    // Add any additional setup here if needed
-  });
 
   test('should load the homepage successfully', async ({ homePage, page }) => {
     await expect(page).toHaveURL('/');
@@ -23,9 +18,9 @@ test.describe('Home Page', () => {
     expect(navLinks.length).toBeGreaterThan(0);
   });
 
-  test('should search for a product', async ({ homePage, page }) => {
-    await homePage.searchProduct('shirt');
-    await expect(page).toHaveURL(/\?s=shirt|\/search/);
+  test('should browse products from homepage', async ({ homePage, page }) => {
+    await homePage.browseProducts();
+    await expect(page).toHaveURL(/catalog/);
   });
 
   test('should navigate to cart when cart icon is clicked', async ({ homePage, page }) => {

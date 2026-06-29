@@ -7,23 +7,19 @@ import { BasePage } from './BasePage';
  */
 export class HomePage extends BasePage {
 
-  // Encapsulation: locators are private — only accessible through methods
-  private readonly searchInput: Locator;
-  private readonly searchButton: Locator;
+  private readonly browseProductsLink: Locator;
   private readonly navLinks: Locator;
-  private readonly cartIcon: Locator;
+  private readonly cartLink: Locator;
   private readonly logo: Locator;
 
   constructor(page: Page) {
-    super(page); // calls BasePage constructor
-    this.searchInput  = page.locator('input[name="s"], #search, [placeholder*="Search"]');
-    this.searchButton = page.locator('button[type="submit"], .search-submit');
-    this.navLinks     = page.locator('nav a, .nav-links a');
-    this.cartIcon     = page.locator('.cart, .cart-icon, a[href*="cart"]');
-    this.logo         = page.locator('.logo, header img, a.brand');
+    super(page);
+    this.browseProductsLink = page.getByRole('link', { name: 'Browse Products' });
+    this.navLinks            = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('link');
+    this.cartLink            = page.getByTestId('navbar-cart-link');
+    this.logo                = page.getByRole('link', { name: 'QA Demo home' });
   }
 
-  // Implements the abstract method from BasePage
   async getPageTitle(): Promise<string> {
     return this.page.title();
   }
@@ -33,14 +29,18 @@ export class HomePage extends BasePage {
     await this.waitForPageLoad();
   }
 
+  async browseProducts(): Promise<void> {
+    await this.browseProductsLink.click();
+    await this.waitForPageLoad();
+  }
+
   async searchProduct(productName: string): Promise<void> {
-    await this.searchInput.fill(productName);
-    await this.searchButton.click();
+    await this.page.goto(`/catalog?search=${encodeURIComponent(productName)}`);
     await this.waitForPageLoad();
   }
 
   async clickCartIcon(): Promise<void> {
-    await this.cartIcon.click();
+    await this.cartLink.click();
     await this.waitForPageLoad();
   }
 

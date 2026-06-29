@@ -2,34 +2,36 @@ import { Page, Locator, expect } from '@playwright/test';
 import { BasePage } from './BasePage';
 
 /**
- * ProductPage — represents a product listing / search results page.
+ * ProductPage — represents a product listing / catalog page.
  * Demonstrates: Inheritance, Encapsulation
  */
 export class ProductPage extends BasePage {
 
-  private readonly productCards: Locator;
   private readonly productTitles: Locator;
-  private readonly productPrices: Locator;
   private readonly addToCartButtons: Locator;
-  private readonly sortDropdown: Locator;
-  private readonly noResultsMessage: Locator;
+  private readonly removeFromCartButtons: Locator;
+  private readonly catalogHeading: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.productCards      = page.locator('.product, .product-card, li.product');
-    this.productTitles     = page.locator('.product h2, .woocommerce-loop-product__title');
-    this.productPrices     = page.locator('.price, .product-price');
-    this.addToCartButtons  = page.locator('a.add_to_cart_button, button.add-to-cart');
-    this.sortDropdown      = page.locator('select.orderby, [name="orderby"]');
-    this.noResultsMessage  = page.locator('.woocommerce-info, .no-products-found');
+    this.productTitles          = page.getByRole('heading', { level: 3 });
+    this.addToCartButtons       = page.getByRole('button', { name: /add .+ to cart/i });
+    this.removeFromCartButtons  = page.getByRole('button', { name: /remove .+ from cart/i });
+    this.catalogHeading         = page.getByRole('heading', { name: 'Product Catalog' });
   }
 
   async getPageTitle(): Promise<string> {
     return this.page.title();
   }
 
+  async goto(): Promise<void> {
+    await this.page.goto('/catalog');
+    await this.waitForPageLoad();
+    await this.catalogHeading.waitFor({ state: 'visible' });
+  }
+
   async getProductCount(): Promise<number> {
-    return this.productCards.count();
+    return this.addToCartButtons.count();
   }
 
   async getProductTitles(): Promise<string[]> {
@@ -37,35 +39,34 @@ export class ProductPage extends BasePage {
   }
 
   async getProductPrices(): Promise<string[]> {
-    return this.productPrices.allTextContents();
+    return this.page.getByText(/\$\d+\.\d{2}/).allTextContents();
   }
 
   async addFirstProductToCart(): Promise<void> {
-    await this.addToCartButtons.first().click();
+    await Promise.all([
+      this.page.waitForResponse(res => res.url().includes('/api/cart') && res.ok()),
+      this.addToCartButtons.first().click(),
+    ]);
+    await expect(this.page.getByTestId('navbar-cart-link')).toHaveAttribute('aria-label', /1 item/i);
     await this.waitForPageLoad();
   }
 
   async addProductToCartByName(productName: string): Promise<void> {
-    const product = this.page.locator('.product', { hasText: productName });
-    await product.locator('a.add_to_cart_button, button.add-to-cart').click();
+    await this.page.getByRole('button', { name: new RegExp(`add ${productName} to cart`, 'i') }).click();
     await this.waitForPageLoad();
   }
 
   async clickProductByName(productName: string): Promise<void> {
-    await this.page.getByRole('link', { name: productName }).first().click();
-    await this.waitForPageLoad();
-  }
-
-  async sortProductsBy(option: string): Promise<void> {
-    await this.sortDropdown.selectOption({ label: option });
+    await this.page.getByRole('link', { name: new RegExp(`view ${productName}`, 'i') }).click();
     await this.waitForPageLoad();
   }
 
   async isNoResultsVisible(): Promise<boolean> {
-    return this.noResultsMessage.isVisible();
+    return this.page.getByText(/no products found|0 products/i).isVisible();
   }
 
   async verifyProductsVisible(): Promise<void> {
-    await expect(this.productCards.first()).toBeVisible();
+    await expect(this.catalogHeading).toBeVisible();
+    await expect(this.addToCartButtons.first()).toBeVisible();
   }
 }

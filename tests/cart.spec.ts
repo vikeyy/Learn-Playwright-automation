@@ -1,5 +1,5 @@
-import { test, expect } from '../fixtures/fixtures';
-import { products } from '../data/testData';
+import { test, expect } from './fixtures/fixtures';
+import { users } from './data/testData';
 
 /**
  * cart.spec.ts — tests for the shopping cart.
@@ -7,9 +7,10 @@ import { products } from '../data/testData';
 
 test.describe('Cart Page', () => {
 
-  test.beforeEach(async ({ homePage, productPage }) => {
-    // Search and add a product to cart before each test
-    await homePage.searchProduct(products.searchTerm);
+  test.beforeEach(async ({ loginPage, productPage }) => {
+    await loginPage.goto();
+    await loginPage.login(users.validUser.username, users.validUser.password);
+    await productPage.goto();
     await productPage.addFirstProductToCart();
   });
 
@@ -22,7 +23,7 @@ test.describe('Cart Page', () => {
   test('should display cart total', async ({ cartPage }) => {
     await cartPage.goto();
     const total = await cartPage.getCartTotal();
-    expect(total).not.toBe('');
+    expect(total).toMatch(/\$\d+\.\d{2}/);
   });
 
   test('should remove item from cart', async ({ cartPage }) => {

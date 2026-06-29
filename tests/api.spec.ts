@@ -12,15 +12,16 @@ test.describe('API Tests', () => {
     expect(response.status()).toBe(200);
   });
 
-  test('should return products from shop endpoint', async ({ request }) => {
-    const response = await request.get('/shop');
+  test('should return products from API endpoint', async ({ request }) => {
+    const response = await request.get('/api/products');
     expect(response.status()).toBe(200);
-    const body = await response.text();
-    expect(body).toContain('product');
+    const body = await response.json();
+    expect(body.success).toBe(true);
+    expect(body.data.length).toBeGreaterThan(0);
   });
 
-  test('should return 404 for non-existent page', async ({ request }) => {
-    const response = await request.get('/this-page-does-not-exist-xyz');
+  test('should return 404 for non-existent API route', async ({ request }) => {
+    const response = await request.get('/api/catalog');
     expect(response.status()).toBe(404);
   });
 

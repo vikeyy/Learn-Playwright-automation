@@ -7,25 +7,17 @@ import { BasePage } from './BasePage';
  */
 export class CartPage extends BasePage {
 
-  private readonly cartItems: Locator;
-  private readonly cartItemNames: Locator;
-  private readonly cartTotal: Locator;
   private readonly removeButtons: Locator;
   private readonly checkoutButton: Locator;
   private readonly emptyCartMessage: Locator;
-  private readonly quantityInputs: Locator;
-  private readonly updateCartButton: Locator;
+  private readonly cartHeading: Locator;
 
   constructor(page: Page) {
     super(page);
-    this.cartItems        = page.locator('tr.cart_item, .cart-item');
-    this.cartItemNames    = page.locator('.cart_item .product-name a, .cart-item .item-name');
-    this.cartTotal        = page.locator('.cart-totals .amount, .order-total .amount');
-    this.removeButtons    = page.locator('a.remove, .remove-item');
-    this.checkoutButton   = page.getByRole('link', { name: /proceed to checkout|checkout/i });
-    this.emptyCartMessage = page.locator('.cart-empty, .woocommerce-info');
-    this.quantityInputs   = page.locator('input.qty, input[name*="qty"]');
-    this.updateCartButton = page.getByRole('button', { name: /update cart/i });
+    this.removeButtons     = page.getByRole('button', { name: /remove .+ from cart/i });
+    this.checkoutButton    = page.getByRole('button', { name: /proceed to checkout/i });
+    this.emptyCartMessage  = page.getByText('Your cart is empty');
+    this.cartHeading       = page.getByRole('heading', { name: 'Shopping Cart' });
   }
 
   async getPageTitle(): Promise<string> {
@@ -35,18 +27,32 @@ export class CartPage extends BasePage {
   async goto(): Promise<void> {
     await this.page.goto('/cart');
     await this.waitForPageLoad();
+    await Promise.race([
+      this.cartHeading.waitFor({ state: 'visible' }),
+      this.emptyCartMessage.waitFor({ state: 'visible' }),
+    ]);
   }
 
   async getCartItemCount(): Promise<number> {
-    return this.cartItems.count();
+    return this.removeButtons.count();
   }
 
   async getCartItemNames(): Promise<string[]> {
-    return this.cartItemNames.allTextContents();
+    const names: string[] = [];
+    const count = await this.removeButtons.count();
+    for (let i = 0; i < count; i++) {
+      const label = await this.removeButtons.nth(i).getAttribute('aria-label');
+      if (label) {
+        names.push(label.replace(/^Remove\s+/i, '').replace(/\s+from cart$/i, ''));
+      }
+    }
+    return names;
   }
 
   async getCartTotal(): Promise<string> {
-    return this.cartTotal.innerText();
+    const mainText = await this.page.locator('main').textContent();
+    const match = mainText?.match(/Total\s*\$(\d+\.\d{2})/i);
+    return match ? `$${match[1]}` : '';
   }
 
   async removeFirstItem(): Promise<void> {
@@ -63,14 +69,8 @@ export class CartPage extends BasePage {
     return this.emptyCartMessage.isVisible();
   }
 
-  async updateQuantity(itemIndex: number, quantity: number): Promise<void> {
-    await this.quantityInputs.nth(itemIndex).fill(quantity.toString());
-    await this.updateCartButton.click();
-    await this.waitForPageLoad();
-  }
-
   async verifyItemInCart(productName: string): Promise<void> {
-    await expect(this.page.locator('.cart_item', { hasText: productName })).toBeVisible();
+    await expect(this.page.getByText(productName)).toBeVisible();
   }
 
   async verifyCartPageLoaded(): Promise<void> {
