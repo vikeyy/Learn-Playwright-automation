@@ -1,78 +1,75 @@
-# Playwright Automation Framework
+# Playwright Beginner Project
 
-TypeScript + Playwright test automation framework for [qademo.com](https://qademo.com) using the Page Object Model (POM).
+Simple Playwright + TypeScript automation for [qademo.com](https://qademo.com).
+
+This project is built for **hands-on learning** — one basic E2E flow with comments explaining each concept.
+
+## What you will learn
+
+| Concept | Where to look |
+|---------|---------------|
+| Page Object Model (POM) | `tests/pages/BasePage.ts`, `tests/pages/ProductPage.ts` |
+| OOP — Inheritance | `ProductPage extends BasePage` |
+| OOP — Encapsulation | Private XPath fields inside `ProductPage` |
+| OOP — Abstraction | `abstract class BasePage` |
+| OOP — Polymorphism | Each page implements `getPageTitle()` differently |
+| Custom fixtures | `tests/fixtures/fixtures.ts` |
+| Test hooks | `beforeAll` and `beforeEach` in `tests/e2e-basic-flow.spec.ts` |
+| XPath locators | Private fields in `ProductPage.ts` |
+| Config (timeouts, browsers, env) | `playwright.config.ts` |
+| Artifacts on failure | Screenshot, video, trace in `playwright.config.ts` |
 
 ## Project structure
 
 ```
-playwright-automation/
-├── playwright.config.ts        # Playwright configuration
-├── package.json                # Dependencies and scripts
-├── tsconfig.json               # TypeScript configuration
-├── .env                        # Environment variables (not committed)
-├── .gitignore
-├── .github/
-│   └── workflows/
-│       └── playwright.yml      # GitHub Actions CI
+├── playwright.config.ts       # Timeouts, browsers, artifacts, env vars
+├── package.json
+├── .env                       # BASE_URL and login credentials (not committed)
 └── tests/
-    ├── pages/                  # Page Object classes
-    │   ├── BasePage.ts         # Abstract base — shared methods
-    │   ├── HomePage.ts
-    │   ├── LoginPage.ts
-    │   ├── ProductPage.ts
-    │   ├── CartPage.ts
-    │   └── CheckoutPage.ts
+    ├── e2e-basic-flow.spec.ts # Single E2E test with hooks
     ├── fixtures/
-    │   └── fixtures.ts         # Custom fixtures for page injection
+    │   └── fixtures.ts        # Custom productPage fixture
     ├── data/
-    │   └── testData.ts         # Centralised test data
-    ├── utils/
-    │   └── helpers.ts          # Reusable utility functions
-    ├── home.spec.ts
-    ├── login.spec.ts
-    ├── product.spec.ts
-    ├── cart.spec.ts
-    └── api.spec.ts
+    │   └── testData.ts        # User credentials and URLs
+    └── pages/
+        ├── BasePage.ts        # Parent page class (shared waits + navigation)
+        └── ProductPage.ts     # Login, catalog, cart actions (XPath)
 ```
+
+## E2E flow
+
+1. Open home page
+2. Click Sign In
+3. Login with standard user
+4. View product catalog
+5. Add first product to cart
+6. Open cart and verify cart page
 
 ## Getting started
 
 ```bash
-# Install dependencies
 npm install
-
-# Install browsers
 npx playwright install
-
-# Run all tests
 npx playwright test
+```
 
+```bash
 # Run with browser visible
 npx playwright test --headed
 
-# Run in interactive UI mode
-npx playwright test --ui
+# Run only the E2E test on Chrome
+npx playwright test tests/e2e-basic-flow.spec.ts --project=chromium
 
-# Run a specific file
-npx playwright test tests/login.spec.ts
-
-# View HTML report
+# View HTML report after a run
 npx playwright show-report
 ```
 
-## OOP concepts used
+## Environment variables
 
-| Pillar | Where |
-|---|---|
-| Encapsulation | Private locators in each Page class |
-| Inheritance | All pages extend `BasePage` |
-| Abstraction | `BasePage` has abstract `getPageTitle()` method |
-| Polymorphism | Each page overrides `getPageTitle()` differently |
+Create a `.env` file in the project root:
 
-## E2E test
-
-Full purchase flow (`tests/e2e-checkout-flow.spec.ts`):
-
-```bash
-npx playwright test tests/e2e-checkout-flow.spec.ts --project=chromium --headed
+```
+BASE_URL=https://qademo.com
+USER_USERNAME=standard_user
+USER_PASSWORD=standard123
 ```
